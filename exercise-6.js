@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var colors = require('colors');
+var groupBy = require('underscore').groupBy;
 var util = require('util');
 
 var connection = mysql.createConnection({
@@ -8,86 +9,53 @@ var connection = mysql.createConnection({
     database: 'addressbook'
 });
 
-connection.query("SELECT Account.id AS accountId, AddressBook.id AS addressBookId, Entry.id AS entryId, email, name, firstName, lastName FROM Account JOIN AddressBook ON Account.id=AddressBook.accountId JOIN Entry ON AddressBook.id=Entry.addressbookId WHERE addressBookId=11", function(err, results) {
+connection.query("SELECT Account.id AS accountId, AddressBook.id AS addressBookId, Entry.id AS entryId, email, name, firstName, lastName FROM Account JOIN AddressBook ON Account.id=AddressBook.accountId JOIN Entry ON AddressBook.id=Entry.addressbookId", function(err, results) {
     if (err) {
         console.log(err);
     }
     else {
         // results is an Array of all the rows
         // this will be called once for each row of results
-        var accounts = results.reduce(
-        function(acc, curr){
+       var accounts = groupBy(results, function(row){
+            return row.accountId;    
+        });
+        
+        var accountObjects = Object.keys(accounts).map(function(key){
             
-            var idxAccount = acc.findIndex(function(item){
-                return item.accountId === curr.accountId;
+            var addressBooks = groupBy(accounts[key], function(row){
+                return row.addressBookId;
             });
-            //console.log(idxAccount);
-          
-            if(idxAccount >= 0){
-                var account = acc[idxAccount];
-                // account.addressBooks.push({
-                //     addressbookId: curr.addressBookId,
-                //     name: curr.name
-                // });
+            console.log(Object.keys(addressBooks));
+            var addressBookObjects = Object.keys(addressBooks).map(function(key1){
+                // console.log(key);
+                // console.log(key1);
                 
-                var idxBook = account.addressBooks.findIndex(function(item){
-                    return item.addressBookId === curr.addressBookId;
+                var entries = groupBy(addressBooks[key1], function(row){
+                    return row.entryId;
                 });
                 
-                if(idxBook >= 0){
-                    // console.log(idxAccount);
-                    // console.log(account.addressBooks[idxBook].entries);
-                    account.addressBooks[idxBook].entries.push({
-                        entryId: curr.entryId,
-                        firstName: curr.firstName,
-                        lastName: curr.lastName
-                    });
-                }
-                else{
-                    account.addressBooks.push({
-                        addressbookId: curr.addressBookId,
-                        name: curr.name,
-                        entries: [{
-                            entryId: curr.entryId,
-                            firstName: curr.firstName,
-                            lastName: curr.lastName
-                        }]
-                    });
-                    
-                    // account.addressBooks[account.addressBooks.length-1].entries.push({
-                    //     entryId: curr.entryId,
-                    //     firstName: curr.firstName,
-                    //     lastName: curr.lastName
-                    // });
-                }
-            }
-            //If we don't, then we push an entry for that accountId
-            else{
-                acc.push({
-                    email: curr.email,
-                    accountId: curr.accountId,
-                    addressBooks: [{
-                        addressBookId: curr.addressBookId,
-                        name: curr.name,
-                        entries: [{
-                            entryId: curr.entryId,
-                            firstName: curr.firstName,
-                            lastName: curr.lastName
-                        }]
-                    }]
+                var entriesObjects = Object.keys(entries).map(function(key2){
+                    return {
+                        entryId: entries[key2][0].entryId,
+                        firstName: entries[key2][0].firstName,
+                        lastName: entries[key2][0].lastName
+                    };
                 });
-            }
-           /* 
-            try {console.log(acc[0].addressBooks[0].entries)}
-            catch(e){}*/
-            return acc;
-        }, 
-        [] //We are starting with an empty array
-        );
-        
-        //console.log(accounts);
-        console.log(util.inspect(accounts, {depth:10, colors: true}));
-        
+                return {
+                    addressBookId: addressBooks[key1][0].addressBookId,
+                    name: addressBooks[key1][0].name,
+                    entries: entriesObjects
+                };
+            });
+            return {
+                accountId: accounts[key][0].accountId,
+                email: accounts[key][0].email,
+                addressBooks: addressBookObjects
+            };
+        });
+
+        //console.log(JSON.stringify(accountObjects,null,2));
+        console.log(util.inspect(accountObjects, {depth:10, colors: true}));
     }
     connection.end();
 });
