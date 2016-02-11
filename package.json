@@ -11,9 +11,19 @@
     "nodejs",
     "workshop"
   ],
-  "author": "",
+  "author": "Andy Ding",
   "license": "ISC",
   "dependencies": {
-    "mysql": "^2.9.0"
-  }
+    "colors": "^1.1.2",
+    "mysql": "^2.10.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andyding1/node-mysql-workshop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/andyding1/node-mysql-workshop/issues"
+  },
+  "homepage": "https://github.com/andyding1/node-mysql-workshop#readme"
 }
