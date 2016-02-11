@@ -15,7 +15,9 @@
   "license": "ISC",
   "dependencies": {
     "colors": "^1.1.2",
-    "mysql": "^2.10.2"
+    "mysql": "^2.10.2",
+    "underscore": "^1.8.3",
+    "util": "^0.10.3"
   },
   "devDependencies": {},
   "repository": {

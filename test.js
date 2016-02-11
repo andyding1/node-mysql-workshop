@@ -77,4 +77,4 @@ var accounts = results.reduce(
 [] //We are starting with an empty array
 );
 
-console.log(JSON.Stringify(accounts,2,null));
+console.log(JSON.Stringify(accounts,null,2));
